@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,13 +25,24 @@ import thara.restaurant_pos.payload.request.CreateCategoryRequest;
 public class CategoryContoller {
 
     @Autowired
-    CategoryRepository CategoryRepository;
+    CategoryRepository categoryRepository;
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<?> getAllCategories() {
+        try {
+            return ResponseEntity.ok(categoryRepository.findAll());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: Could not retrieve categories. " + e.getMessage());
+        }
+    }
 
     // Endpoint to create a new category
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> createCategory(@Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
-        if (CategoryRepository.existsByName(createCategoryRequest.getName())) {
+        if (categoryRepository.existsByName(createCategoryRequest.getName())) {
             return ResponseEntity.badRequest().body("Error: Category name is already taken!");
         }
 
@@ -38,7 +50,7 @@ public class CategoryContoller {
             Category category = new Category();
             category.setName(createCategoryRequest.getName());
             category.setOrder(createCategoryRequest.getSort_order());
-            CategoryRepository.save(category);
+            categoryRepository.save(category);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not create category. " + e.getMessage());
@@ -50,13 +62,13 @@ public class CategoryContoller {
     @DeleteMapping("/delete/{categoryName}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> deleteCategory(@Valid @PathVariable String categoryName) {
-        Category category = CategoryRepository.findByName(categoryName);
+        Category category = categoryRepository.findByName(categoryName);
         if (category == null) {
             return ResponseEntity.badRequest().body("Error: Category not found!");
         }
 
         try {
-            CategoryRepository.delete(category);
+            categoryRepository.delete(category);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not delete category. " + e.getMessage());
