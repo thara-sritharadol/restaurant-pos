@@ -32,6 +32,9 @@ import thara.restaurant_pos.repository.RoleRepository;
 import thara.restaurant_pos.repository.UserRepository;
 import thara.restaurant_pos.security.Jwt.JwtUtils;
 import thara.restaurant_pos.security.services.UserDetailsImpl;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -52,6 +55,9 @@ public class AuthController {
 
     @Autowired
     JwtUtils jwtUtils;
+
+    
+    
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -135,4 +141,25 @@ public class AuthController {
             .body(new MessageResponse("You've been signed out!"));
     }
     
+    @GetMapping("/me")
+    public ResponseEntity<?> getCurrentUserInfo(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return ResponseEntity.status(401).body(new MessageResponse("Error: Unauthorized"));
+        }
+
+        UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+        List<String> roles = userDetails.getAuthorities().stream()
+            .map(item -> item.getAuthority())
+            .collect(Collectors.toList());
+
+        return ResponseEntity.ok(
+            new UserInfoResponse(
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles
+            )
+        );
+    }
+
 }
