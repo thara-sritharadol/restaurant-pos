@@ -59,22 +59,19 @@ public class CategoryContoller {
         return ResponseEntity.ok("Category created successfully");
     }
 
-    @DeleteMapping("/delete/{categoryName}")
+    @DeleteMapping("/delete/{category_id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<?> deleteCategory(@Valid @PathVariable String categoryName) {
-        Category category = categoryRepository.findByName(categoryName);
-        if (category == null) {
-            return ResponseEntity.badRequest().body("Error: Category not found!");
-        }
-
+    public ResponseEntity<?> deleteCategory(@PathVariable Integer category_id) {
         try {
-            categoryRepository.delete(category);
+            if (!categoryRepository.existsById(category_id)) {
+                return ResponseEntity.badRequest().body("Error: Category not found!");
+            }
+
+            categoryRepository.deleteById(category_id);
+            return ResponseEntity.ok("Category deleted successfully");
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not delete category. " + e.getMessage());
         }
-
-        return ResponseEntity.ok("Category deleted successfully");
     }
-
 }
