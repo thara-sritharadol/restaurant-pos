@@ -11,6 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,6 +40,17 @@ public class MenuItemController {
 
     @Value("${thara.app.upload.path}")
     private String uploadPath;
+
+    @GetMapping("/all")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<?> getAllMenuItems() {
+        try {
+            return ResponseEntity.ok(menuItemRepository.findAll());
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: Could not retrieve menu items. " + e.getMessage());
+        }
+    }
 
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
@@ -79,6 +93,21 @@ public class MenuItemController {
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not create menu item. " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{menuItemId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
+    public ResponseEntity<?> deleteMenuItem(@PathVariable Integer menuItemId) {
+        try {
+            MenuItem menuItem = menuItemRepository.findById(menuItemId)
+                .orElseThrow(() -> new RuntimeException("Error: Menu item not found with id: " + menuItemId));
+
+            menuItemRepository.delete(menuItem);
+            return ResponseEntity.ok("Menu item deleted successfully");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: Could not delete menu item. " + e.getMessage());
         }
     }
 
