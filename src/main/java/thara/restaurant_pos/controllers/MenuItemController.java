@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import thara.restaurant_pos.models.MenuItem;
+import thara.restaurant_pos.dto.MenuItemDTO;
 import thara.restaurant_pos.models.Category;
 import thara.restaurant_pos.repository.CategoryRepository;
 import thara.restaurant_pos.repository.MenuItemRepository;
@@ -41,11 +43,28 @@ public class MenuItemController {
     @Value("${thara.app.upload.path}")
     private String uploadPath;
 
+    private MenuItemDTO mapToMenuItemDTO(MenuItem menuItem) {
+        MenuItemDTO dto = new MenuItemDTO();
+        dto.setId(menuItem.getId());
+        dto.setName(menuItem.getName());
+        dto.setPrice(menuItem.getPrice());
+        if (menuItem.getCategory() != null) {
+            dto.setCategoryId(menuItem.getCategory().getId());
+            dto.setCategoryName(menuItem.getCategory().getName());
+        }
+        dto.setDescription(menuItem.getDescription());
+        dto.setImageUrl(menuItem.getImageUrl());
+        dto.setAvailable(menuItem.isAvailable());
+        return dto;
+    }
+
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllMenuItems() {
         try {
-            return ResponseEntity.ok(menuItemRepository.findAll());
+            List<MenuItem> menuItems = menuItemRepository.findAll();
+            List<MenuItemDTO> menuItemDTOs = menuItems.stream().map(this::mapToMenuItemDTO).toList();
+            return ResponseEntity.ok().body(menuItemDTOs);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not retrieve menu items. " + e.getMessage());
