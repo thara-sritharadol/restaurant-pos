@@ -33,7 +33,6 @@ import thara.restaurant_pos.repository.UserRepository;
 import thara.restaurant_pos.security.Jwt.JwtUtils;
 import thara.restaurant_pos.security.services.UserDetailsImpl;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 

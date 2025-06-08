@@ -1,7 +1,5 @@
 package thara.restaurant_pos.payload.request;
 
-import jakarta.persistence.criteria.CriteriaBuilder.In;
-
 public class CreateCategoryRequest {
     private String name;
     private Integer sort_order;
