@@ -23,6 +23,7 @@ import thara.restaurant_pos.models.OrderItem;
 import thara.restaurant_pos.models.User;
 import thara.restaurant_pos.repository.OrderRepository;
 import thara.restaurant_pos.repository.UserRepository;
+import thara.restaurant_pos.services.MapToDTOService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -35,7 +36,10 @@ public class OrderController {
     @Autowired
     OrderRepository orderRepository;
 
-    private OrderDTO mapToOrderDTO(Order order) {
+    @Autowired
+    MapToDTOService mapToDTOService;
+
+    /*private OrderDTO mapToOrderDTO(Order order) {
         OrderDTO dto = new OrderDTO();
         dto.setId(order.getId());
         dto.setUserId(order.getUser() != null ? order.getUser().getId() : null);
@@ -58,14 +62,15 @@ public class OrderController {
         }
 
         return dto;
-    }
+    }*/
+    
     @GetMapping("/all")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllOrder() {
         try {
             List<Order> orders = orderRepository.findAll();
             //stream use list can process individual, map to map order with mapToOrder function, toList is to list
-            List<OrderDTO> orderDTOs = orders.stream().map(this::mapToOrderDTO).toList();
+            List<OrderDTO> orderDTOs = orders.stream().map(mapToDTOService::mapToOrderDTO).toList();
             return ResponseEntity.ok(orderDTOs);
         } catch (Exception e) {
             e.printStackTrace();
@@ -82,7 +87,7 @@ public class OrderController {
                 return ResponseEntity.status(404).body("Order not found.");
             }
             Order order = orderOptional.get();
-            OrderDTO dto = mapToOrderDTO(order);
+            OrderDTO dto = mapToDTOService.mapToOrderDTO(order);
             return ResponseEntity.ok(dto);
         } catch(Exception e) {
             e.printStackTrace();
