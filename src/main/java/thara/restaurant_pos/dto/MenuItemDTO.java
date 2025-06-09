@@ -2,8 +2,6 @@ package thara.restaurant_pos.dto;
 
 import java.math.BigDecimal;
 
-import thara.restaurant_pos.models.Category;
-
 public class MenuItemDTO {
     private Integer id;
     private String name;
