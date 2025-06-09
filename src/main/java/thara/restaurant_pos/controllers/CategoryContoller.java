@@ -27,7 +27,7 @@ public class CategoryContoller {
     @Autowired
     CategoryRepository categoryRepository;
 
-    @GetMapping("/all")
+    @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllCategories() {
         try {
@@ -39,7 +39,7 @@ public class CategoryContoller {
     }
 
     // Endpoint to create a new category
-    @PostMapping("/create")
+    @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> createCategory(@Valid @RequestBody CreateCategoryRequest createCategoryRequest) {
         if (categoryRepository.existsByName(createCategoryRequest.getName())) {
@@ -59,15 +59,15 @@ public class CategoryContoller {
         return ResponseEntity.ok("Category created successfully");
     }
 
-    @DeleteMapping("/delete/{category_id}")
+    @DeleteMapping("/{categoryId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<?> deleteCategory(@PathVariable Integer category_id) {
+    public ResponseEntity<?> deleteCategory(@PathVariable Integer categoryId) {
         try {
-            if (!categoryRepository.existsById(category_id)) {
+            if (!categoryRepository.existsById(categoryId)) {
                 return ResponseEntity.badRequest().body("Error: Category not found!");
             }
 
-            categoryRepository.deleteById(category_id);
+            categoryRepository.deleteById(categoryId);
             return ResponseEntity.ok("Category deleted successfully");
         } catch (Exception e) {
             e.printStackTrace();

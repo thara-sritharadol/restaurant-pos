@@ -58,7 +58,7 @@ public class MenuItemController {
         return dto;
     }
 
-    @GetMapping("/all")
+    @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllMenuItems() {
         try {
@@ -71,7 +71,7 @@ public class MenuItemController {
         }
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> createMenuItem(
         @RequestParam("name") String name,
@@ -115,7 +115,7 @@ public class MenuItemController {
         }
     }
 
-    @DeleteMapping("/delete/{menuItemId}")
+    @DeleteMapping("/{menuItemId}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> deleteMenuItem(@PathVariable Integer menuItemId) {
         try {

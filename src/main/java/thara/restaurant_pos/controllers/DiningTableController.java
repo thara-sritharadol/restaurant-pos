@@ -26,7 +26,7 @@ public class DiningTableController {
     @Autowired
     DiningTableRepository diningTableRepository;
 
-    @GetMapping("/all")
+    @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllDiningTables() {
         try {
@@ -41,7 +41,7 @@ public class DiningTableController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> createDiningTable(@RequestParam String tableNumber) {
         try {
@@ -61,7 +61,7 @@ public class DiningTableController {
         }
     }
 
-    @PatchMapping("/update-status/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> updateDiningTableStatus(@PathVariable Long id, @RequestParam String status) {
         try {
@@ -85,7 +85,7 @@ public class DiningTableController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
     public ResponseEntity<?> deleteDiningTable(@PathVariable Long id) {
         try {

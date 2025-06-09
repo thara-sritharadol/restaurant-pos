@@ -38,7 +38,7 @@ public class OrderController {
     @Autowired
     MapToDTOService mapToDTOService;
     
-    @GetMapping("/all")
+    @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllOrder() {
         try {
@@ -69,7 +69,7 @@ public class OrderController {
         }
     }
 
-    @PostMapping("/create")
+    @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> createOrder(Authentication authentication, @RequestBody Order requestOrder) {
         try {
