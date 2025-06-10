@@ -1,5 +1,7 @@
 package thara.restaurant_pos.controllers;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -30,14 +32,25 @@ public class DiningTableController {
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllDiningTables() {
         try {
-            System.out.println("Fetching all dining tables...");
-            if (diningTableRepository.count() == 0) {
-                return ResponseEntity.ok("No dining tables found.");
-            }
             return ResponseEntity.ok(diningTableRepository.findAll());
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not retrieve dining tables. " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{Id}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<?> getDiningTableById(@PathVariable Long Id) {
+        try {
+            Optional<DiningTable> diningTable = diningTableRepository.findById(Id);
+            if (diningTable.isEmpty()) {
+                return ResponseEntity.status(404).body("Dining table not found.");
+            }
+            
+            return ResponseEntity.ok().body(diningTable);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body(null);
         }
     }
 
