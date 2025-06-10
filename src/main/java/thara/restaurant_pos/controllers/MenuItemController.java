@@ -26,6 +26,8 @@ import thara.restaurant_pos.dto.MenuItemDTO;
 import thara.restaurant_pos.models.Category;
 import thara.restaurant_pos.repository.CategoryRepository;
 import thara.restaurant_pos.repository.MenuItemRepository;
+import thara.restaurant_pos.services.MapToDTOService;
+
 import org.springframework.web.bind.annotation.PostMapping;
 
 
@@ -40,30 +42,18 @@ public class MenuItemController {
     @Autowired
     CategoryRepository categoryRepository;
 
+    @Autowired
+    MapToDTOService mapToDTOService;
+
     @Value("${thara.app.upload.path}")
     private String uploadPath;
-
-    private MenuItemDTO mapToMenuItemDTO(MenuItem menuItem) {
-        MenuItemDTO dto = new MenuItemDTO();
-        dto.setId(menuItem.getId());
-        dto.setName(menuItem.getName());
-        dto.setPrice(menuItem.getPrice());
-        if (menuItem.getCategory() != null) {
-            dto.setCategoryId(menuItem.getCategory().getId());
-            dto.setCategoryName(menuItem.getCategory().getName());
-        }
-        dto.setDescription(menuItem.getDescription());
-        dto.setImageUrl(menuItem.getImageUrl());
-        dto.setAvailable(menuItem.isAvailable());
-        return dto;
-    }
 
     @GetMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
     public ResponseEntity<?> getAllMenuItems() {
         try {
             List<MenuItem> menuItems = menuItemRepository.findAll();
-            List<MenuItemDTO> menuItemDTOs = menuItems.stream().map(this::mapToMenuItemDTO).toList();
+            List<MenuItemDTO> menuItemDTOs = menuItems.stream().map(menuItem -> mapToDTOService.mapToMenuItemDTO(menuItem)).toList();
             return ResponseEntity.ok().body(menuItemDTOs);
         } catch (Exception e) {
             e.printStackTrace();

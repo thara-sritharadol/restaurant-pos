@@ -5,9 +5,11 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import thara.restaurant_pos.dto.MenuItemDTO;
 import thara.restaurant_pos.dto.OrderDTO;
 import thara.restaurant_pos.dto.OrderItemDTO;
 import thara.restaurant_pos.dto.PaymentDTO;
+import thara.restaurant_pos.models.MenuItem;
 import thara.restaurant_pos.models.Order;
 import thara.restaurant_pos.models.Payment;
 
@@ -53,5 +55,20 @@ public class MapToDTOService {
         paymentDTO.setPaid_at(payment.getPaid_at());
         paymentDTO.setOrder(mapToOrderDTO(order));
         return paymentDTO;
+    }
+
+    public MenuItemDTO mapToMenuItemDTO(MenuItem menuItem) {
+        MenuItemDTO dto = new MenuItemDTO();
+        dto.setId(menuItem.getId());
+        dto.setName(menuItem.getName());
+        dto.setPrice(menuItem.getPrice());
+        if (menuItem.getCategory() != null) {
+            dto.setCategoryId(menuItem.getCategory().getId());
+            dto.setCategoryName(menuItem.getCategory().getName());
+        }
+        dto.setDescription(menuItem.getDescription());
+        dto.setImageUrl(menuItem.getImageUrl());
+        dto.setAvailable(menuItem.isAvailable());
+        return dto;
     }
 }
