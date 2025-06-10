@@ -1,5 +1,6 @@
 package thara.restaurant_pos.services;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -20,6 +21,8 @@ public class MapToDTOService {
         dto.setDiningTableId(order.getDiningTable() != null ? order.getDiningTable().getId() : null);
         dto.setStatus(order.getStatus().name());
         dto.setTotalPrice(order.getTotalPrice());
+
+
         dto.setCreatedAt(order.getCreatedAt());
 
         if (order.getOrderItems() != null) {
@@ -29,6 +32,10 @@ public class MapToDTOService {
                 itemDTO.setMenuItemId(item.getMenuItem() != null ? item.getMenuItem().getId() : null);
                 itemDTO.setQuantity(item.getQuantity());
                 itemDTO.setPrice(item.getPrice());
+
+                BigDecimal totalPrice = BigDecimal.ZERO;
+                itemDTO.setTotalPrice(totalPrice.add(itemDTO.getPrice().multiply(BigDecimal.valueOf(itemDTO.getQuantity()))));
+
                 itemDTO.setNote(item.getNote());
                 return itemDTO;
             }).toList();

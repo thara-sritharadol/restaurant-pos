@@ -7,6 +7,7 @@ public class OrderItemDTO {
     private Integer menuItemId;
     private Integer quantity;
     private BigDecimal price;
+    private BigDecimal totalPrice;
     private String note;
 
     public Integer getId() { return id; }
@@ -20,6 +21,14 @@ public class OrderItemDTO {
 
     public BigDecimal getPrice() { return price; }
     public void setPrice(BigDecimal price) { this.price = price; }
+
+    public BigDecimal getTotalPrice() {
+        return totalPrice;
+    }
+
+    public void setTotalPrice(BigDecimal totalPrice) {
+        this.totalPrice = totalPrice;
+    }
 
     public String getNote() { return note; }
     public void setNote(String note) { this.note = note; }
