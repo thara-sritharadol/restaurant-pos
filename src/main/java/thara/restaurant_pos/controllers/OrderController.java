@@ -1,5 +1,7 @@
 package thara.restaurant_pos.controllers;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -17,9 +19,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import thara.restaurant_pos.dto.OrderDTO;
 import thara.restaurant_pos.models.EOrderStatus;
+import thara.restaurant_pos.models.MenuItem;
 import thara.restaurant_pos.models.Order;
 import thara.restaurant_pos.models.OrderItem;
 import thara.restaurant_pos.models.User;
+import thara.restaurant_pos.payload.request.OrderItemRequest;
+import thara.restaurant_pos.payload.request.OrderRequest;
+import thara.restaurant_pos.repository.MenuItemRepository;
 import thara.restaurant_pos.repository.OrderRepository;
 import thara.restaurant_pos.repository.UserRepository;
 import thara.restaurant_pos.services.MapToDTOService;
@@ -34,6 +40,9 @@ public class OrderController {
     
     @Autowired
     OrderRepository orderRepository;
+
+    @Autowired
+    MenuItemRepository menuItemRepository;
 
     @Autowired
     MapToDTOService mapToDTOService;
@@ -71,7 +80,7 @@ public class OrderController {
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
-    public ResponseEntity<?> createOrder(Authentication authentication, @RequestBody Order requestOrder) {
+    public ResponseEntity<?> createOrder(Authentication authentication, @RequestBody OrderRequest requestOrder) {
         try {
             String username = authentication.getName();
             Optional<User> userOptional = userRepository.findByUsername(username);
@@ -84,15 +93,40 @@ public class OrderController {
             order.setUser(userOptional.get());
             order.setDiningTable(requestOrder.getDiningTable());
             order.setStatus(EOrderStatus.ORDER_STATUS_PENDING);
-            order.setTotalPrice(requestOrder.getTotalPrice());
-            order.setOrderItems(requestOrder.getOrderItems());
 
-            // Set the parent order in each OrderItem
-            if (order.getOrderItems() != null) {
-                for (OrderItem item : order.getOrderItems()) {
-                    item.setOrder(order);
+            BigDecimal totalPrice = BigDecimal.ZERO;
+            List<OrderItem> orderItems = new ArrayList<>();
+            
+            if (requestOrder.getOrderItems() != null) {
+                for (OrderItemRequest itemReq : requestOrder.getOrderItems()) {
+                    MenuItem menuItem = itemReq.getMenuItem();
+                    if (menuItem == null || menuItem.getId() == null) {
+                        return ResponseEntity.badRequest().body("MenuItem is required for each order item.");
+                    }
+                    // ดึง MenuItem จากฐานข้อมูลเพื่อเอาราคาจริง
+                    Optional<MenuItem> menuItemOpt = menuItemRepository.findById(menuItem.getId());
+                    if (menuItemOpt.isEmpty()) {
+                        return ResponseEntity.badRequest().body("MenuItem not found: " + menuItem.getId());
+                    }
+                    MenuItem dbMenuItem = menuItemOpt.get();
+
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setMenuItem(dbMenuItem);
+                    orderItem.setQuantity(itemReq.getQuantity());
+                    orderItem.setPrice(dbMenuItem.getPrice());
+                    orderItem.setNote(itemReq.getNote());
+
+                    if (dbMenuItem.getPrice() != null && itemReq.getQuantity() != null) {
+                        totalPrice = totalPrice.add(dbMenuItem.getPrice().multiply(BigDecimal.valueOf(itemReq.getQuantity())));
+                    }
+
+                    orderItems.add(orderItem);
                 }
             }
+
+            order.setOrderItems(orderItems);
+            order.setTotalPrice(totalPrice);
 
             orderRepository.save(order);
 
