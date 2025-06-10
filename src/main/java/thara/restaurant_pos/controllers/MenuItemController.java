@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -60,6 +61,22 @@ public class MenuItemController {
             return ResponseEntity.status(500).body("Error: Could not retrieve menu items. " + e.getMessage());
         }
     }
+
+    @GetMapping("/{MenuItemId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<?> findMenuItemById(@PathVariable Integer MenuItemId) {
+        try {
+            Optional<MenuItem> menuItemOptional = menuItemRepository.findById(MenuItemId);
+            if (menuItemOptional.isEmpty()) {
+                return ResponseEntity.status(404).body("Menu item not found.");
+            }
+            MenuItem menuItem = menuItemOptional.get();
+            MenuItemDTO menuItemDTO = mapToDTOService.mapToMenuItemDTO(menuItem);
+            return ResponseEntity.ok().body(menuItemDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error : Counld not retrieve menu item");
+        }
+    } 
 
     @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
