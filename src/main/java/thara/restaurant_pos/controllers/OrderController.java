@@ -130,7 +130,9 @@ public class OrderController {
 
             orderRepository.save(order);
 
-            return ResponseEntity.ok("Order created successfully.");
+            OrderDTO orderDTO = mapToDTOService.mapToOrderDTO(order);
+
+            return ResponseEntity.status(201).body(orderDTO);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: " + e.getMessage());

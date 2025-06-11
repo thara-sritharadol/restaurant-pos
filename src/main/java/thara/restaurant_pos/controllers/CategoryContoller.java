@@ -50,13 +50,16 @@ public class CategoryContoller {
             Category category = new Category();
             category.setName(createCategoryRequest.getName());
             category.setOrder(createCategoryRequest.getSort_order());
+
             categoryRepository.save(category);
+
+            return ResponseEntity.status(201).body(category);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not create category. " + e.getMessage());
         }
 
-        return ResponseEntity.ok("Category created successfully");
+        
     }
 
     @DeleteMapping("/{categoryId}")

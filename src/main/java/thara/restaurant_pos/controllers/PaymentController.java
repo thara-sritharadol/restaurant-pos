@@ -92,9 +92,11 @@ public class PaymentController {
             payment.setAmount(order.getTotalPrice());
             payment.setMethod(requestPayment.getMethod());
 
+            
             paymentRepository.save(payment);
 
-            return ResponseEntity.ok().body("Payment created successfully");
+            PaymentDTO paymentDTO = mapToDTOService.mapToPaymentDTO(payment, order);
+            return ResponseEntity.status(201).body(paymentDTO);
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -115,7 +115,7 @@ public class MenuItemController {
 
             menuItemRepository.save(menuItem);
 
-            return ResponseEntity.ok(menuItem);
+            return ResponseEntity.status(201).body(menuItem);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not create menu item. " + e.getMessage());

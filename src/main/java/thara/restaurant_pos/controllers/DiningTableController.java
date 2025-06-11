@@ -67,7 +67,7 @@ public class DiningTableController {
             diningTable.setStatus(ETableStatus.TABLE_STATUS_AVAILABLE);
             diningTableRepository.save(diningTable);
 
-            return ResponseEntity.ok("Dining table created successfully.");
+            return ResponseEntity.status(201).body(diningTable);
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(500).body("Error: Could not create dining table. " + e.getMessage());
