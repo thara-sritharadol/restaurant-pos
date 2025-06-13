@@ -76,7 +76,29 @@ public class MenuItemController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error : Counld not retrieve menu item");
         }
-    } 
+    }
+
+    @GetMapping("/category/{categoryId}")
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER') or hasRole('STAFF')")
+    public ResponseEntity<?> findMenuItemByCategoryId(@PathVariable Integer categoryId) {
+        try {
+            Optional<Category> categoryOptional = categoryRepository.findById(categoryId);
+            if (categoryOptional.isEmpty()) {
+                return ResponseEntity.status(404).body("Category not found.");
+            }
+
+            Category category = categoryOptional.get();
+            List<MenuItem> menuItems = menuItemRepository.findByCategory(category);
+            List<MenuItemDTO> menuItemDTOs = menuItems.stream()
+                .map(menuItem -> mapToDTOService.mapToMenuItemDTO(menuItem))
+                .toList();
+
+            return ResponseEntity.ok(menuItemDTOs);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(500).body("Error: Could not retrieve menu items by category. " + e.getMessage());
+        }
+    }
 
     @PostMapping(value = "/", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
